@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>What Would You Like?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --p1-color: #4facfe;
+            --p1-bg: #e0f3ff;
+            --p2-color: #ff0844;
+            --p2-bg: #ffe0e9;
+            /* Uniform font points strictly to bubbly font */
+            --default-font: 'Fredoka One', cursive;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            font-family: var(--default-font);
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #ffdfba;
+            color: #333;
+        }
+
+        /* --- Start Screen --- */
+        #start-screen {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ffdfba, #baffc9);
+            z-index: 100;
+        }
+
+        .title {
+            font-size: 8rem;
+            color: #fff;
+            -webkit-text-stroke: 4px #4a2f1d;
+            text-shadow: 6px 6px 0 #4a2f1d, 12px 12px 0 rgba(0,0,0,0.2);
+            text-align: center;
+            margin-bottom: 20px;
+            z-index: 10;
+        }
+
+        /* CSS Capybara Mascot */
+        .capybara {
+            width: 140px;
+            height: 110px;
+            background: #8e5c3b;
+            border-radius: 45% 55% 45% 45%;
+            position: relative;
+            border: 5px solid #4a2f1d;
+            box-shadow: inset -10px -10px 0 rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            z-index: 10;
+            animation: bounce 2s infinite alternate;
+        }
+        .capybara::before, .capybara::after {
+            content: ''; position: absolute;
+            width: 25px; height: 25px;
+            background: #6b4329;
+            border-radius: 50%;
+            border: 4px solid #4a2f1d;
+            top: -10px;
+        }
+        .capybara::before { left: 20px; }
+        .capybara::after { right: 40px; }
+        .capy-face {
+            position: absolute; width: 100%; height: 100%;
+        }
+        .capy-eye {
+            position: absolute; width: 12px; height: 12px;
+            background: #000; border-radius: 50%; top: 35px;
+        }
+        .capy-eye.left { left: 35px; }
+        .capy-eye.right { right: 55px; }
+        .capy-nose {
+            position: absolute; width: 20px; height: 14px;
+            background: #4a2f1d; border-radius: 50%;
+            top: 55px; left: 65px;
+        }
+        .capy-blush {
+            position: absolute; width: 15px; height: 10px;
+            background: rgba(255,100,100,0.5); border-radius: 50%;
+            top: 45px;
+        }
+        .capy-blush.left { left: 20px; }
+        .capy-blush.right { right: 40px; }
+
+        /* Timer Settings on Start Screen */
+        .timer-settings {
+            z-index: 10;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            color: #fff;
+            -webkit-text-stroke: 2px #4a2f1d;
+            text-shadow: 4px 4px 0 #4a2f1d, 6px 6px 0 rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #timer-input {
+            font-size: 2.5rem;
+            width: 120px;
+            text-align: center;
+            border-radius: 15px;
+            border: 5px solid #4a2f1d;
+            background: #ffcc00;
+            color: #fff;
+            -webkit-text-stroke: 2px #4a2f1d;
+            box-shadow: 0 5px 0 #b38f00;
+            outline: none;
+            pointer-events: auto; 
+            user-select: auto;
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            z-index: 10;
+            max-width: 900px;
+        }
+
+        .start-btn {
+            padding: 20px 40px;
+            font-size: 2.5rem;
+            background: #ffb347;
+            color: #fff;
+            border: 6px solid #fff;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 0 #cc8400, 0 15px 20px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+            -webkit-text-stroke: 2px #cc8400;
+        }
+        
+        .start-btn.blue {
+            background: #4facfe;
+            box-shadow: 0 10px 0 #1b73d6, 0 15px 20px rgba(0,0,0,0.2);
+            -webkit-text-stroke: 2px #1b73d6;
+        }
+
+        .start-btn.green {
+            background: #4caf50;
+            box-shadow: 0 10px 0 #2e7d32, 0 15px 20px rgba(0,0,0,0.2);
+            -webkit-text-stroke: 2px #2e7d32;
+        }
+
+        .start-btn:active {
+            transform: translateY(10px);
+            box-shadow: 0 0px 0 transparent, 0 5px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Rotating Background Animation */
+        .floating-bg-food {
+            position: absolute;
+            opacity: 0.7;
+            animation: spin linear infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-15px); }
+        }
+
+        /* --- Game Layout --- */
+        #game-screen {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Home Button */
+        #home-btn {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            padding: 10px 25px;
+            font-size: 2rem;
+            background: #ffb347;
+            color: #fff;
+            border: 4px solid #fff;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #cc8400;
+            transition: transform 0.1s;
+            -webkit-text-stroke: 1.5px #cc8400;
+            z-index: 100;
+        }
+        #home-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0 transparent;
+        }
+
+        #timer-bar {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            padding: 10px 40px;
+            font-size: 2.5rem;
+            border-radius: 30px;
+            border: 5px solid #333;
+            z-index: 50;
+            color: #333;
+            box-shadow: 0 5px 0 #ccc;
+        }
+
+        .split-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .player-side {
+            flex: 1;
+            position: relative;
+            overflow: hidden; 
+        }
+
+        /* Screen Sides explicitly Chef Left, Customer Right in G3 mode */
+        #screen-chef { background-color: var(--p2-bg); border-right: 4px dashed #ccc; }
+        #screen-customer { background-color: var(--p1-bg); }
+        
+        /* Updated Score Box CSS to anchor perfectly beside the timer */
+        .score-box {
+            position: absolute;
+            top: 15px;
+            font-size: 2.5rem;
+            background: rgba(255,255,255,0.8);
+            padding: 10px 30px;
+            border-radius: 30px;
+            border: 5px solid #333;
+            color: #333;
+            z-index: 20;
+            box-shadow: 0 5px 0 #ccc;
+        }
+        #screen-chef .score-box { right: 160px; left: auto; color: var(--p2-color); }
+        #screen-customer .score-box { left: 160px; right: auto; color: var(--p1-color); }
+
+        .game-ui {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* G1 UI Positioning */
+        #p1-g1-ui, #p2-g1-ui {
+            justify-content: center; /* This perfectly centers the image and word */
+            padding-bottom: 80px; /* Accounts for the boxes at the bottom */
+        }
+
+        /* General Food Display (G1, G2) */
+        .food-display {
+            font-size: 10rem; /* Increased size */
+            margin-bottom: 30px; 
+            animation: pulse 1s infinite alternate;
+            background: #fff; 
+            border: 8px solid #ffd700; 
+            border-radius: 50%;
+            width: 250px; /* Increased size */
+            height: 250px; /* Increased size */
+            display: flex; 
+            align-items: center;
+            justify-content: center; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
+
+        /* Standard Game 1 Word Box */
+        .puzzle-word {
+            font-size: 7rem; /* Increased size */
+            letter-spacing: 10px; 
+            margin-bottom: 0; /* Removed margin to keep it centered */
+            color: #fff;
+            -webkit-text-stroke: 3px #333; 
+            text-shadow: 4px 4px 0 #333;
+            padding: 20px 40px; 
+            border-radius: 30px; 
+            border: 8px solid transparent;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+        }
+
+        /* Enhanced Game 2 Word Box */
+        .g2-word {
+            font-size: 8rem; text-transform: lowercase;
+            letter-spacing: 0px; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); z-index: 10; pointer-events: none; 
+            background: rgba(255,255,255,0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .puzzle-word.correct { background-color: #4caf50; border-color: #2e7d32; }
+        .puzzle-word.incorrect { background-color: #f44336; border-color: #c62828; }
+
+        /* Game 1 Options */
+        .options-container { 
+            display: flex; 
+            gap: 30px; 
+            position: absolute; 
+            bottom: 40px; /* Forces boxes to the bottom for easy reach */
+        }
+        .letter-btn {
+            width: 120px; /* Increased size */
+            height: 120px; /* Increased size */
+            font-size: 5rem; /* Increased size */
+            border-radius: 25px;
+            border: 6px solid #fff; 
+            background: #ffcc00; 
+            color: #fff; 
+            cursor: pointer;
+            -webkit-text-stroke: 2px #333; 
+            box-shadow: 0 10px 0 #b38f00; 
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        #screen-customer .letter-btn { background: var(--p1-color); box-shadow: 0 10px 0 #2b80ff; }
+        #screen-chef .letter-btn { background: var(--p2-color); box-shadow: 0 10px 0 #cc0033; }
+        .letter-btn:active, .letter-btn.pressed { transform: translateY(10px); box-shadow: 0 0px 0 transparent !important; }
+        
+        /* Game 2 Floating Emojis */
+        .floating-options-container {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;
+        }
+        .emoji-btn {
+            position: absolute; 
+            width: 160px; /* Increased for kids */
+            height: 160px; /* Increased for kids */
+            font-size: 7.5rem; /* Increased for kids */
+            background: #fff; border: 6px solid #ffcc00; border-radius: 50%; cursor: pointer;
+            box-shadow: 0 8px 0 #b38f00; display: flex; align-items: center; justify-content: center;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.05s;
+            pointer-events: auto; z-index: 5;
+        }
+        #screen-customer .emoji-btn { border-color: var(--p1-color); box-shadow: 0 8px 0 #2b80ff; }
+        #screen-chef .emoji-btn { border-color: var(--p2-color); box-shadow: 0 8px 0 #cc0033; }
+        .emoji-btn:active, .emoji-btn.pressed { transform: scale(0.8) !important; box-shadow: 0 0px 0 transparent !important; }
+        .disabled { opacity: 0.5; pointer-events: none; }
+
+
+        /* ================= GAME 3 SPECIFIC CSS ================= */
+        #g3-chef-ui, #g3-customer-ui { justify-content: start; padding-top: 100px; }
+
+        /* Emoji bubbles for characters */
+        .g3-char-pic {
+            width: 180px; height: 180px; border-radius: 50%; border: 8px solid #fff;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1); margin-bottom: 20px; object-fit: cover;
+        }
+        .g3-char-emoji {
+            font-size: 8rem; display: flex; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* G3 Right (Customer Screen 2) Styles */
+        .g3-customer-speech {
+            font-size: 4rem; color: #fff; -webkit-text-stroke: 1.5px #333; text-shadow: 2px 2px 0 #333;
+            text-align: center; margin-bottom: 40px;
+            background: rgba(0,0,0,0.1); padding: 20px 40px; border-radius: 20px;
+        }
+        #g3-blank {
+            border-bottom: 5px dashed #fff; padding: 0 30px; color: #ffcc00; transition: all 0.3s;
+            display: inline-block; min-width: 200px; text-transform: lowercase;
+        }
+        #g3-blank.filled {
+            border-bottom: 5px solid transparent; background: #fff; color: #333; border-radius: 15px; padding: 5px 30px; -webkit-text-stroke: 0; text-shadow: none;
+        }
+        
+        /* Menu Grid */
+        .g3-menu-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 95%; max-width: 500px; transition: opacity 0.3s;
+        }
+        .g3-food-card {
+            background: #fff; border: 5px solid #ffcc00; border-radius: 15px; display: flex; flex-direction: column; 
+            align-items: center; padding: 10px; cursor: pointer; transition: transform 0.1s;
+        }
+        .g3-food-card:active { transform: scale(0.9); }
+        .g3-food-card.selected { border-color: #4caf50; background: #e8f5e9; }
+        .g3-emoji { font-size: 3.5rem; } 
+        .g3-label { font-size: 1.2rem; font-weight: bold; color: #333;}
+
+        /* G3 Left (Chef Screen 1) Sentence Builder */
+        #g3-chef-sentence-mode {
+            width: 100%; display: flex; flex-direction: column; align-items: center;
+        }
+        .g3-conveyor-msg {
+            color: #fff; font-size: 3.5rem; margin-bottom: 30px; -webkit-text-stroke: 1px #333; text-shadow: 2px 2px 0 #333;
+            text-align: center;
+        }
+        .g3-build-area {
+            min-height: 110px; width: 90%; max-width: 600px; border: 5px dashed #fff; border-radius: 20px; 
+            margin-bottom: 40px; display: flex; gap: 15px; padding: 20px; flex-wrap: wrap; justify-content: center; 
+            transition: all 0.3s; background: rgba(255,255,255,0.2);
+        }
+        .g3-build-area.correct { background: #4caf50; border-color: #2e7d32; }
+        .g3-build-area.incorrect { background: #f44336; border-color: #c62828; }
+        
+        .g3-word-tray {
+            width: 90%; max-width: 600px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;
+        }
+        .g3-word-btn {
+            background: var(--p2-color); border: 4px solid #fff; border-radius: 15px; padding: 15px 30px; 
+            font-size: 2.2rem; color: #fff; cursor: pointer; -webkit-text-stroke: 1px #333; 
+            box-shadow: 0 8px 0 #b38f00; transition: transform 0.1s;
+        }
+        .g3-word-btn:active { transform: translateY(8px); box-shadow: none; }
+
+        /* G3 Left (Chef Screen 1) Conveyor Belt */
+        #g3-chef-conveyor-mode {
+            width: 100%; display: flex; flex-direction: column; align-items: center;
+        }
+        .g3-conveyor-container {
+            width: 95%; height: 280px; background: #3e2723; border-radius: 30px; border: 8px solid #1f1209; 
+            position: relative; overflow: hidden; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5);
+        }
+        .g3-belt-line {
+            width: 100%; height: 90px; background: #5d4037; border-top: 5px dashed #3e2723; 
+            border-bottom: 5px dashed #3e2723; position: absolute; top: 50%; transform: translateY(-50%);
+        }
+        #g3-items-area { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        
+        .g3-belt-item {
+            position: absolute; left: -140px; font-size: 6.5rem; cursor: pointer; background: rgba(255,255,255,0.8); 
+            border-radius: 50%; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center;
+            border: 5px solid #ffcc00; box-shadow: 0 8px 10px rgba(0,0,0,0.3); transition: background-color 0.2s, border-color 0.2s;
+            animation: moveRightBelt 3s linear forwards; 
+        }
+        .g3-belt-item:active { transform: scale(0.9); }
+        @keyframes moveRightBelt { from { left: -140px; } to { left: 110%; } }
+
+        /* End Screen */
+        #end-screen {
+            display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85); z-index: 200; flex-direction: column;
+            align-items: center; justify-content: center; color: #fff;
+        }
+        .winnerText {
+            font-size: 6rem; color: #ffd700; -webkit-text-stroke: 3px #fff; margin-bottom: 30px; text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h1 class="title">What Would<br>You Like?</h1>
+        
+        <div class="capybara">
+            <div class="capy-face">
+                <div class="capy-blush left"></div>
+                <div class="capy-blush right"></div>
+                <div class="capy-eye left"></div>
+                <div class="capy-eye right"></div>
+                <div class="capy-nose"></div>
+            </div>
+        </div>
+
+        <div class="timer-settings">
+            Time: <input type="number" id="timer-input" value="60" min="10" max="300"> sec
+        </div>
+
+        <div class="menu-buttons">
+            <button class="start-btn" onclick="startGame(1)">Spelling Game</button>
+            <button class="start-btn blue" onclick="startGame(2)">Catch the Food</button>
+            <button class="start-btn green" onclick="startGame(3)">Restaurant</button>
+        </div>
+    </div>
+
+    <div id="game-screen">
+        <button id="home-btn" onclick="goHome()">🏠 Menu</button>
+        <div id="timer-bar">Time: <span id="time-left">60</span></div>
+        
+        <div class="split-container">
+            <div id="screen-chef" class="player-side">
+                <div class="score-box" id="score-box-p2">P2: <span id="score2">0</span></div>
+                
+                <div id="p2-g1-ui" class="game-ui">
+                    <div class="food-display" id="food1">🍞</div>
+                    <div class="puzzle-word" id="word1">_READ</div>
+                    <div class="options-container" id="options1"></div>
+                </div>
+
+                <div id="p2-g2-ui" class="game-ui" style="display:none;">
+                    <div class="puzzle-word g2-word" id="target-word1">chicken</div>
+                    <div class="floating-options-container" id="floating-options1"></div>
+                </div>
+
+                <div id="g3-chef-ui" class="game-ui" style="display:none;">
+                    <div class="g3-char-emoji g3-char-pic">👨‍🍳</div>
+                    
+                    <div id="g3-chef-sentence-mode">
+                        <div class="g3-conveyor-msg" style="margin-top:20px;">Build the question!</div>
+                        <div class="g3-build-area" id="g3-build-area"></div>
+                        <div class="g3-word-tray" id="g3-word-tray"></div>
+                    </div>
+
+                    <div id="g3-chef-conveyor-mode" style="display:none;">
+                        <div class="g3-conveyor-msg" id="g3-conveyor-msg">Waiting for order...</div>
+                        <div class="g3-conveyor-container">
+                            <div class="g3-belt-line"></div>
+                            <div id="g3-items-area"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="screen-customer" class="player-side">
+                <div class="score-box" id="score-box-p1">P1: <span id="score1">0</span></div>
+                
+                <div id="p1-g1-ui" class="game-ui">
+                    <div class="food-display" id="food2">🍕</div>
+                    <div class="puzzle-word" id="word2">PIZZ_</div>
+                    <div class="options-container" id="options2"></div>
+                </div>
+
+                <div id="p1-g2-ui" class="game-ui" style="display:none;">
+                    <div class="puzzle-word g2-word" id="target-word2">noodles</div>
+                    <div class="floating-options-container" id="floating-options2"></div>
+                </div>
+
+                <div id="g3-customer-ui" class="game-ui" style="display:none;">
+                    <div class="g3-char-emoji g3-char-pic">😋</div>
+                    
+                    <div class="g3-customer-speech">
+                        I'd like some <br><span id="g3-blank">______</span><br> for <span id="g3-meal-text">dinner</span>.
+                    </div>
+                    <div class="g3-menu-grid" id="g3-menu">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="end-screen">
+        <div class="winnerText" id="winner-text">Player 1 Wins!</div>
+        <button class="start-btn" onclick="goHome()">Main Menu</button>
+    </div>
+
+    <script>
+        // Main Food Targets
+        const foods = [
+            { word: 'BREAD', emoji: '🍞' },
+            { word: 'CHICKEN', emoji: '🍗' },
+            { word: 'SALAD', emoji: '🥗' },
+            { word: 'SOUP', emoji: '🍲' },
+            { word: 'NOODLES', emoji: '🍜' },
+            { word: 'PIZZA', emoji: '🍕' },
+            { word: 'RICE', emoji: '🍚' },
+            { word: 'BEEF', emoji: '🥩' }
+        ];
+
+        const distractors = ['🧦', '👟', '🚗', '⚽', '🧸', '🎈', '🎸', '📱', '🐟', '🍎', '🍩', '🍔', '🍟', '🌮', '🍣'];
+
+        let score1 = 0; let score2 = 0; 
+        let timeLeft = 60;
+        let gameInterval; let currentMode = 1;
+
+        // Visual Background for Start Menu
+        function createRotatingBackground() {
+            const startScreen = document.getElementById('start-screen');
+            const bgEmojis = ['🍔','🍕','🍎','🍇','🍉','🍩','🍟','🥗','🥞','🍓','🍗','🍲','🍜','🌮','🍣','🌭','🍿','🍦','🍪','🥑', '🍚', '🥩', '🍞'];
+            for(let i = 0; i < 80; i++) {
+                let el = document.createElement('div');
+                el.className = 'floating-bg-food';
+                el.innerText = bgEmojis[Math.floor(Math.random() * bgEmojis.length)];
+                el.style.fontSize = (Math.random() * 5 + 3) + 'rem';
+                el.style.left = (Math.random() * 100) + 'vw';
+                el.style.top = (Math.random() * 100) + 'vh';
+                el.style.animationDirection = Math.random() > 0.5 ? 'normal' : 'reverse';
+                el.style.animationDuration = (Math.random() * 8 + 4) + 's';
+                el.style.animationDelay = '-' + (Math.random() * 5) + 's';
+                startScreen.appendChild(el);
+            }
+        }
+        createRotatingBackground();
+
+        function startGame(mode) {
+            currentMode = mode;
+            let inputTime = parseInt(document.getElementById('timer-input').value);
+            timeLeft = (isNaN(inputTime) || inputTime <= 0) ? 60 : inputTime;
+
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            
+            // SCORE & TIMER HANDLING
+            if (mode === 3) {
+                document.getElementById('timer-bar').style.display = 'none'; 
+                document.getElementById('score-box-p1').style.display = 'none';
+                document.getElementById('score-box-p2').style.display = 'none';
+                timeLeft = null; 
+            } else {
+                document.getElementById('timer-bar').style.display = 'block';
+                document.getElementById('score-box-p1').style.display = 'block';
+                document.getElementById('score-box-p2').style.display = 'block';
+                document.getElementById('time-left').innerText = timeLeft; 
+            }
+            
+            // Toggle Visibility
+            document.getElementById('p1-g1-ui').style.display = mode === 1 ? 'flex' : 'none';
+            document.getElementById('p2-g1-ui').style.display = mode === 1 ? 'flex' : 'none';
+            document.getElementById('p1-g2-ui').style.display = mode === 2 ? 'flex' : 'none';
+            document.getElementById('p2-g2-ui').style.display = mode === 2 ? 'flex' : 'none';
+            document.getElementById('g3-chef-ui').style.display = mode === 3 ? 'flex' : 'none';
+            document.getElementById('g3-customer-ui').style.display = mode === 3 ? 'flex' : 'none';
+            
+            if (mode === 1) { generateG1(1); generateG1(2); } 
+            else if (mode === 2) { generateG2(1); generateG2(2); }
+            else if (mode === 3) { generateG3(); }
+            
+            // Start countdown only if a timer is active (G1/G2)
+            if (timeLeft !== null) {
+                gameInterval = setInterval(() => {
+                    timeLeft--;
+                    document.getElementById('time-left').innerText = timeLeft;
+                    if(timeLeft <= 0) endGame();
+                }, 1000);
+            }
+        }
+
+        // ================= GAME 1 LOGIC =================
+        function generateG1(pNum) {
+            const currentFood = foods[Math.floor(Math.random() * foods.length)];
+            
+            let currentDomesticScreen = (pNum === 1) ? document.getElementById('screen-chef') : document.getElementById('screen-customer');
+            let foodEl = currentDomesticScreen.querySelector('.food-display');
+            let wordEl = currentDomesticScreen.querySelector('.puzzle-word');
+            let optionsContainer = currentDomesticScreen.querySelector('.options-container');
+
+            foodEl.innerText = currentFood.emoji;
+            const wordArr = currentFood.word.split('');
+            const missingIndex = Math.floor(Math.random() * wordArr.length);
+            const correctLetter = wordArr[missingIndex];
+            wordArr[missingIndex] = '_';
+            
+            wordEl.innerText = wordArr.join('');
+            wordEl.className = 'puzzle-word'; 
+            wordEl.style.transform = 'translate(0, 0)';
+
+            const options = getLetterOptions(correctLetter);
+            optionsContainer.innerHTML = ''; 
+
+            let isLocked = false; 
+            options.forEach(letter => {
+                let btn = document.createElement('button');
+                btn.className = 'letter-btn'; btn.innerText = letter;
+                btn.addEventListener('pointerdown', (e) => {
+                    e.preventDefault(); if (isLocked) return;
+                    isLocked = true; btn.classList.add('pressed');
+                    const guessedArr = currentFood.word.split('');
+                    guessedArr[missingIndex] = letter;
+                    handleAnswerG1(pNum, letter, correctLetter, guessedArr.join(''), wordEl, optionsContainer);
+                });
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function getLetterOptions(correct) {
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; let letters = [correct];
+            while(letters.length < 3) {
+                let rand = alphabet[Math.floor(Math.random() * alphabet.length)];
+                if(!letters.includes(rand)) letters.push(rand);
+            }
+            return letters.sort(() => Math.random() - 0.5);
+        }
+
+        function handleAnswerG1(pNum, selected, correct, guessedWord, wordEl, container) {
+            wordEl.innerText = guessedWord;
+            Array.from(container.children).forEach(child => child.classList.add('disabled'));
+            if(selected === correct) {
+                if(pNum === 1) score2++; else score1++;
+                wordEl.classList.add('correct');
+            } else {
+                if(pNum === 1) score2--; else score1--;
+                wordEl.classList.add('incorrect'); shakeElement(wordEl);
+            }
+            updateScore(pNum); setTimeout(() => generateG1(pNum), 1500);
+        }
+
+        // ================= GAME 2 LOGIC =================
+        let g2Physics = { 1: [], 2: [] }; let g2AnimFrames = { 1: null, 2: null };
+        function generateG2(pNum) {
+            const currentFood = foods[Math.floor(Math.random() * foods.length)];
+            
+            let currentDomesticScreen = (pNum === 1) ? document.getElementById('screen-chef') : document.getElementById('screen-customer');
+            let wordEl = currentDomesticScreen.querySelector('.puzzle-word.g2-word');
+            let container = currentDomesticScreen.querySelector('.floating-options-container');
+
+            wordEl.innerText = currentFood.word;
+            wordEl.className = 'puzzle-word g2-word'; 
+            wordEl.style.transform = 'translate(-50%, -50%)';
+
+            let emojiOptions = [currentFood.emoji];
+            while(emojiOptions.length < 5) {
+                let randEmoji = distractors[Math.floor(Math.random() * distractors.length)];
+                if(!emojiOptions.includes(randEmoji) && randEmoji !== currentFood.emoji) {
+                    emojiOptions.push(randEmoji);
+                }
+            }
+            emojiOptions.sort(() => Math.random() - 0.5);
+
+            container.innerHTML = ''; 
+            if(g2AnimFrames[pNum]) cancelAnimationFrame(g2AnimFrames[pNum]);
+            g2Physics[pNum] = [];
+
+            let isLocked = false;
+            let cWidth = container.clientWidth || (window.innerWidth / 2);
+            let cHeight = container.clientHeight || window.innerHeight;
+            let btnSize = 160;
+            let minX = 0; let maxX = cWidth - btnSize;
+            let minY = 100; let maxY = cHeight - btnSize;
+
+            emojiOptions.forEach(emoji => {
+                let btn = document.createElement('button');
+                btn.className = 'emoji-btn'; btn.innerText = emoji;
+                let startX = Math.random() * (maxX - minX) + minX;
+                let startY = Math.random() * (maxY - minY) + minY;
+                btn.style.left = startX + 'px'; btn.style.top = startY + 'px';
+
+                let speedX = (Math.random() * 6 + 4) * (Math.random() > 0.5 ? 1 : -1);
+                let speedY = (Math.random() * 6 + 4) * (Math.random() > 0.5 ? 1 : -1);
+
+                g2Physics[pNum].push({ el: btn, x: startX, y: startY, dx: speedX, dy: speedY });
+                
+                btn.addEventListener('pointerdown', (e) => {
+                    e.preventDefault(); if (isLocked) return;
+                    isLocked = true; btn.classList.add('pressed');
+                    handleAnswerG2(pNum, emoji, currentFood.emoji, wordEl, container, btn);
+                });
+                container.appendChild(btn);
+            });
+
+            function bounceLoop() {
+                cWidth = container.clientWidth; cHeight = container.clientHeight;
+                maxX = cWidth - btnSize; maxY = cHeight - btnSize;
+                g2Physics[pNum].forEach(p => {
+                    p.x += p.dx; p.y += p.dy;
+                    if (p.x <= minX) { p.x = minX; p.dx *= -1; }
+                    if (p.x >= maxX) { p.x = maxX; p.dx *= -1; }
+                    if (p.y <= minY) { p.y = minY; p.dy *= -1; }
+                    if (p.y >= maxY) { p.y = maxY; p.dy *= -1; }
+                    p.el.style.left = p.x + 'px'; p.el.style.top = p.y + 'px';
+                });
+                g2AnimFrames[pNum] = requestAnimationFrame(bounceLoop);
+            }
+            bounceLoop();
+        }
+
+        function handleAnswerG2(pNum, selected, correct, wordEl, container, clickedBtn) {
+            cancelAnimationFrame(g2AnimFrames[pNum]);
+            Array.from(container.children).forEach(child => child.classList.add('disabled'));
+            if(selected === correct) {
+                if(pNum === 1) score2++; else score1++;
+                wordEl.classList.add('correct');
+                clickedBtn.style.backgroundColor = '#4caf50'; clickedBtn.style.borderColor = '#2e7d32';
+            } else {
+                if(pNum === 1) score2--; else score1--;
+                wordEl.classList.add('incorrect');
+                clickedBtn.style.backgroundColor = '#f44336'; clickedBtn.style.borderColor = '#c62828';
+                shakeElementG2Center(wordEl);
+            }
+            updateScore(pNum); setTimeout(() => generateG2(pNum), 1500);
+        }
+        function shakeElementG2Center(el) {
+            el.style.transform = "translate(calc(-50% + 10px), -50%)";
+            setTimeout(() => {
+                el.style.transform = "translate(calc(-50% - 10px), -50%)";
+                setTimeout(() => el.style.transform = "translate(-50%, -50%)", 100);
+            }, 100);
+        }
+
+        // ================= GAME 3 LOGIC (Restaurant - SWAPPED) =================
+        let g3SentenceTarget = [];
+        const mealOptions = ['breakfast', 'lunch', 'dinner'];
+        let currentMeal = 'dinner';
+        let g3Order = null;
+        let g3BeltInterval = null;
+
+        function generateG3() {
+            g3Order = null;
+            if(g3BeltInterval) clearInterval(g3BeltInterval);
+            
+            // Randomly select the meal time for this round
+            currentMeal = mealOptions[Math.floor(Math.random() * mealOptions.length)];
+            g3SentenceTarget = ['What', 'would', 'you', 'like', 'for', currentMeal, '?'];
+            
+            // Update the Customer's speech bubble to match the selected meal
+            document.getElementById('g3-meal-text').innerText = currentMeal;
+
+            // Reset Customer Side (Screen 2 - Right)
+            document.getElementById('g3-blank').innerText = '______';
+            document.getElementById('g3-blank').classList.remove('filled');
+            drawG3Menu(false); 
+
+            // Reset Chef Side (Screen 1 - Left)
+            document.getElementById('g3-chef-sentence-mode').style.display = 'flex';
+            document.getElementById('g3-chef-conveyor-mode').style.display = 'none';
+            drawG3SentenceBuilder();
+        }
+
+        function drawG3Menu(isActive) {
+            let menu = document.getElementById('g3-menu');
+            menu.innerHTML = '';
+            menu.style.opacity = isActive ? '1' : '0.5';
+            menu.style.pointerEvents = isActive ? 'auto' : 'none';
+
+            foods.forEach(f => {
+                let card = document.createElement('div');
+                card.className = 'g3-food-card';
+                card.innerHTML = `<div class="g3-emoji">${f.emoji}</div><div class="g3-label">${f.word.toLowerCase()}</div>`;
+                card.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    if(!isActive || g3Order) return; 
+                    g3Order = f;
+                    
+                    document.getElementById('g3-blank').innerText = f.word.toLowerCase();
+                    document.getElementById('g3-blank').classList.add('filled');
+                    card.classList.add('selected');
+                    
+                    startG3Belt();
+                });
+                menu.appendChild(card);
+            });
+        }
+
+        function drawG3SentenceBuilder() {
+            let tray = document.getElementById('g3-word-tray');
+            let build = document.getElementById('g3-build-area');
+            tray.innerHTML = ''; build.innerHTML = '';
+
+            let shuffled = [...g3SentenceTarget].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach(word => {
+                let btn = document.createElement('button');
+                btn.className = 'g3-word-btn';
+                btn.innerText = word;
+                btn.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    if (btn.parentElement === tray) {
+                        build.appendChild(btn);
+                        checkG3Sentence();
+                    } else {
+                        tray.appendChild(btn);
+                    }
+                });
+                tray.appendChild(btn);
+            });
+        }
+
+        function checkG3Sentence() {
+            let build = document.getElementById('g3-build-area');
+            let currentWords = Array.from(build.children).map(b => b.innerText);
+            
+            if (currentWords.length === g3SentenceTarget.length) {
+                let isCorrect = currentWords.every((w, i) => w === g3SentenceTarget[i]);
+                
+                if (isCorrect) {
+                    build.classList.add('correct');
+                    
+                    setTimeout(() => {
+                        build.classList.remove('correct');
+                        document.getElementById('g3-chef-sentence-mode').style.display = 'none';
+                        document.getElementById('g3-chef-conveyor-mode').style.display = 'flex';
+                        document.getElementById('g3-conveyor-msg').innerText = "Waiting for customer...";
+                        drawG3Menu(true); 
+                    }, 1000);
+                } else {
+                    build.classList.add('incorrect');
+                    shakeElement(build);
+                    setTimeout(() => {
+                        build.classList.remove('incorrect');
+                        drawG3SentenceBuilder(); 
+                    }, 800);
+                }
+            }
+        }
+
+        function startG3Belt() {
+            document.getElementById('g3-conveyor-msg').innerText = `Chef! Customer wants: ${g3Order.word.toLowerCase()}`;
+            
+            let itemsArea = document.getElementById('g3-items-area');
+            itemsArea.innerHTML = '';
+            let beltActive = true;
+
+            g3BeltInterval = setInterval(() => {
+                if(!beltActive) return;
+
+                let isTarget = Math.random() > 0.5; // 50% chance to spawn target
+                let food = isTarget ? g3Order : foods[Math.floor(Math.random() * foods.length)];
+                
+                let item = document.createElement('div');
+                item.className = 'g3-belt-item';
+                item.innerText = food.emoji;
+                item.style.top = Math.random() * 80 + 30 + 'px'; 
+                
+                item.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    if(!beltActive) return;
+
+                    if(food.word === g3Order.word) {
+                        beltActive = false; 
+                        clearInterval(g3BeltInterval);
+                        
+                        item.style.backgroundColor = '#4caf50'; item.style.borderColor = '#2e7d32';
+                        item.style.animationPlayState = 'paused';
+
+                        let rect = item.getBoundingClientRect();
+                        let targetRect = document.getElementById('g3-blank').getBoundingClientRect();
+                        flyFoodAnimationSwapped(food.emoji, rect.left, rect.top, targetRect.left, targetRect.top);
+                        
+                        setTimeout(() => {
+                            generateG3(); 
+                        }, 1200);
+                    } else {
+                        item.style.backgroundColor = '#f44336'; item.style.borderColor = '#c62828';
+                        shakeElement(item);
+                    }
+                });
+                itemsArea.appendChild(item);
+                setTimeout(() => { if(item.parentElement) item.remove(); }, 3000); 
+                
+            }, 1000); 
+        }
+
+        function flyFoodAnimationSwapped(emoji, startX, startY, targetX, targetY) {
+            let flyEl = document.createElement('div');
+            flyEl.innerText = emoji;
+            flyEl.style.position = 'fixed';
+            flyEl.style.left = startX + 'px';
+            flyEl.style.top = startY + 'px';
+            flyEl.style.fontSize = '8rem';
+            flyEl.style.zIndex = 1000;
+            flyEl.style.transition = 'all 1.1s cubic-bezier(0.25, 1, 0.5, 1)'; 
+            document.body.appendChild(flyEl);
+            flyEl.getBoundingClientRect(); 
+            
+            flyEl.style.left = targetX + 'px';
+            flyEl.style.top = targetY + 'px';
+            flyEl.style.transform = 'scale(1.8) rotate(360deg)';
+            
+            setTimeout(() => flyEl.remove(), 1100);
+        }
+
+        // ================= SHARED UTILS =================
+        function updateScore(pNum) { 
+            if(pNum === 1) document.querySelector('#screen-chef .score-box span').innerText = score2;
+            else document.querySelector('#screen-customer .score-box span').innerText = score1;
+        }
+        
+        function shakeElement(el) {
+            el.style.transform = "translateX(10px)";
+            setTimeout(() => {
+                el.style.transform = "translateX(-10px)";
+                setTimeout(() => el.style.transform = "translate(0, 0)", 100);
+            }, 100);
+        }
+
+        // Soft Reset function to preserve the custom timer setting!
+        function goHome() {
+            clearInterval(gameInterval);
+            if(g3BeltInterval) clearInterval(g3BeltInterval);
+            cancelAnimationFrame(g2AnimFrames[1]); 
+            cancelAnimationFrame(g2AnimFrames[2]);
+
+            score1 = 0; 
+            score2 = 0;
+            updateScore(1); 
+            updateScore(2);
+
+            document.getElementById('g3-items-area').innerHTML = '';
+            document.getElementById('floating-options1').innerHTML = '';
+            document.getElementById('floating-options2').innerHTML = '';
+
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'flex';
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            if(g3BeltInterval) clearInterval(g3BeltInterval);
+            cancelAnimationFrame(g2AnimFrames[1]); cancelAnimationFrame(g2AnimFrames[2]);
+
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'flex';
+
+            let wintxt = "";
+            if(score1 > score2) wintxt = "Player 1 Wins!";
+            else if(score2 > score1) wintxt = "Player 2 Wins!";
+            else wintxt = "It's a Tie!";
+            document.getElementById('winner-text').innerText = wintxt;
+        }
+    </script>
+</body>
+</html>
